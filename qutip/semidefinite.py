@@ -215,7 +215,7 @@ def dnorm_problem(dim,J_dat=None):
     # The objective, however, depends on J.
     objective = cvxpy.Maximize(cvxpy.trace(
         Jr.T * X.re + Ji.T * X.im
-       # (Jr.T @ X.re) + (Ji.T @ X.im)
+       
     ))
 
     Jr_nnz.value = Jr_val.data
