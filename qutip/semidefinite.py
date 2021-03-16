@@ -41,6 +41,7 @@ from collections import namedtuple
 
 # NumPy/SciPy
 import numpy as np
+import scipy.sparse as sp
 
 # Conditionally import CVXPY
 try:
@@ -151,7 +152,7 @@ def qudit_swap(dim):
     return tensor_swap(W, (0, 1))
 
 @memoize
-def dnorm_problem(dim):
+def dnorm_problem(dim,J_dat=None):
     # Start assembling constraints and variables.
     constraints = []
 
@@ -184,14 +185,41 @@ def dnorm_problem(dim):
 
     logger.debug("Using {} constraints.".format(len(constraints)))
 
-    Jr = cvxpy.Parameter((dim**2, dim**2))
-    Ji = cvxpy.Parameter((dim**2, dim**2))
+    
+    J_val = sp.coo_matrix(sp.csr_matrix((J_dat.data, J_dat.indices, J_dat.indptr),
+                         shape=J_dat.shape))
+    
+    def adapt_sparse_params(A_val,dim):
+        
+        A = cvxpy.Parameter((dim**2, dim**2))
+        side_size = dim**2
+        A_nnz = cvxpy.Parameter(A_val.nnz)
+        
+        A_data = np.ones(A_nnz.size)
+        A_rows = A_val.row * side_size + A_val.col
+        A_cols = np.arange(A_nnz.size)
+
+        A_Indexer = sp.coo_matrix(
+        (A_data, (A_rows, A_cols)), shape=(side_size**2, A_nnz.size))
+        
+        A = cvxpy.reshape(A_Indexer @ A_nnz, (side_size, side_size), order='C')
+
+        return A_nnz , A  
+
+    Jr_val = J_val.real
+    Jr_nnz,Jr = adapt_sparse_params(Jr_val,dim)
+
+    Ji_val = J_val.imag
+    Ji_nnz,Ji = adapt_sparse_params(Ji_val,dim)
 
     # The objective, however, depends on J.
     objective = cvxpy.Maximize(cvxpy.trace(
         Jr.T * X.re + Ji.T * X.im
        # (Jr.T @ X.re) + (Ji.T @ X.im)
     ))
+
+    Jr_nnz.value = Jr_val.data
+    Ji_nnz.value = Ji_val.data
 
     problem = cvxpy.Problem(objective, constraints)
     print('problem defined')

@@ -455,13 +455,15 @@ def dnorm(A, B=None, solver="CVXOPT", verbose=False, force_solve=False):
     # Assume square...
     dim = np.prod(J.dims[0][0])
 
+    
     # The constraints only depend on the dimension, so
     # we can cache them efficiently.
-    problem, Jr, Ji, X, rho0, rho1 = dnorm_problem(dim)
+    #problem, Jr, Ji, X, rho0, rho1 = dnorm_problem(dim)
 
     # Load the parameters with the Choi matrix passed in.
     J_dat = J.data
 
+    problem, Jr, Ji, X, rho0, rho1 = dnorm_problem(dim,J_dat)
    # Jr.value = sp.csr_matrix((J_dat.data.real, J_dat.indices, J_dat.indptr),
 #                             shape=J_dat.shape)
 
@@ -475,10 +477,16 @@ def dnorm(A, B=None, solver="CVXOPT", verbose=False, force_solve=False):
    # except Warning :
        # print('cvxopt can not process sparse matrices. Trying with dense matrices')
 
-    Jr.value = sp.csr_matrix((J_dat.data.real, J_dat.indices, J_dat.indptr),
-                            shape=J_dat.shape).todense()
-    Ji.value = sp.csr_matrix((J_dat.data.imag, J_dat.indices, J_dat.indptr),
-                            shape=J_dat.shape).todense()
+    #THIS WORKS
+    # Jr.value = sp.csr_matrix((J_dat.data.real, J_dat.indices, J_dat.indptr),
+    #                         shape=J_dat.shape).todense()
+
+
+
+    # Ji.value = sp.csr_matrix((J_dat.data.imag, J_dat.indices, J_dat.indptr),
+    #                         shape=J_dat.shape).todense()
+    #########
+  
     problem.solve(solver=solver, verbose=verbose)
 
 
