@@ -151,7 +151,7 @@ def qudit_swap(dim):
     W = qeye([dim, dim])
     return tensor_swap(W, (0, 1))
 
-@memoize
+#@memoize
 def dnorm_problem(dim,J_dat=None):
     # Start assembling constraints and variables.
     constraints = []
