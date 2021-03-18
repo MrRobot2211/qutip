@@ -222,6 +222,6 @@ def dnorm_problem(dim,J_dat=None):
     Ji_nnz.value = Ji_val.data
 
     problem = cvxpy.Problem(objective, constraints)
-    print('problem defined')
+    # print('problem defined')
     return problem, Jr, Ji, X, rho0, rho1
 
