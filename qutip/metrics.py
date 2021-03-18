@@ -456,36 +456,14 @@ def dnorm(A, B=None, solver="CVXOPT", verbose=False, force_solve=False):
     dim = np.prod(J.dims[0][0])
 
     
-    # The constraints only depend on the dimension, so
+    # It is no longer ttrue that constraints only depend on the dimension, so
     # we can cache them efficiently.
     #problem, Jr, Ji, X, rho0, rho1 = dnorm_problem(dim)
 
     # Load the parameters with the Choi matrix passed in.
     J_dat = J.data
 
-    problem, Jr, Ji, X, rho0, rho1 = dnorm_problem(dim,J_dat)
-   # Jr.value = sp.csr_matrix((J_dat.data.real, J_dat.indices, J_dat.indptr),
-#                             shape=J_dat.shape)
-
-   # Ji.value = sp.csr_matrix((J_dat.data.imag, J_dat.indices, J_dat.indptr),
-                      #       shape=J_dat.shape)
-    # Finally, set up and run the problem.
-   # try:
-        
-    #    problem.solve(solver=solver, verbose=verbose)
-    
-   # except Warning :
-       # print('cvxopt can not process sparse matrices. Trying with dense matrices')
-
-    #THIS WORKS
-    # Jr.value = sp.csr_matrix((J_dat.data.real, J_dat.indices, J_dat.indptr),
-    #                         shape=J_dat.shape).todense()
-
-
-
-    # Ji.value = sp.csr_matrix((J_dat.data.imag, J_dat.indices, J_dat.indptr),
-    #                         shape=J_dat.shape).todense()
-    #########
+    problem, Jr, Ji, X, rho0, rho1 = dnorm_problem(dim, J_dat)
   
     problem.solve(solver=solver, verbose=verbose)
 
