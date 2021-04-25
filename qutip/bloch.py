@@ -31,6 +31,8 @@
 #    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ###############################################################################
 
+
+# The main issue founf here is the use of 'l' and 'm' as styles should I want the same or different alphas, maybe just carry on the way it is done here
 __all__ = ['Bloch']
 
 import os
@@ -93,6 +95,8 @@ class Bloch:
     point_color : list, default ["b", "r", "g", "#CC6600"]
         List of colors for Bloch sphere point markers to cycle through, i.e.
         by default, points 0 and 4 will both be blue ('b').
+    point_alpha : float,list default 1.
+        Number or list that sets point transparency.
     point_marker : list, default ["o", "s", "d", "^"]
         List of point marker shapes to cycle through.
     point_size : list, default [25, 32, 35, 45]
@@ -129,7 +133,7 @@ class Bloch:
         Positions of +z and -z labels respectively.
     """
     def __init__(self, fig=None, axes=None, view=None, figsize=None,
-                 background=False):
+                 background=False, point_alpha=1.):
         # Figure and axes
         self.fig = fig
         self.axes = axes
@@ -181,6 +185,8 @@ class Bloch:
         # ---point options---
         # List of colors for Bloch point markers, default = ['b','g','r','y']
         self.point_color = ['b', 'r', 'g', '#CC6600']
+        # List of transparencies for Bloch point markersmdefault=1
+        self.point_alpha = point_alpha
         # Size of point markers, default = 25
         self.point_size = [25, 32, 35, 45]
         # Shape of point markers, default = ['o','^','d','s']
@@ -276,6 +282,7 @@ class Bloch:
         s += "frame_color:     " + str(self.frame_color) + "\n"
         s += "frame_width:     " + str(self.frame_width) + "\n"
         s += "point_color:     " + str(self.point_color) + "\n"
+        s += "point_alpha:     " + str(self.point_alpha) + "\n"
         s += "point_marker:    " + str(self.point_marker) + "\n"
         s += "point_size:      " + str(self.point_size) + "\n"
         s += "sphere_alpha:    " + str(self.sphere_alpha) + "\n"
@@ -316,7 +323,7 @@ class Bloch:
         self.point_style = []
         self.annotations = []
 
-    def add_points(self, points, meth='s'):
+    def add_points(self, points, meth='s',alpha):
         """Add a list of data points to bloch sphere.
 
         Parameters
@@ -339,12 +346,15 @@ class Bloch:
                 pnts = points
             self.points.append(pnts)
             self.point_style.append('s')
+            self.point_alpha.append(alpha)
         elif meth == 'l':
             self.points.append(points)
             self.point_style.append('l')
+            self.point_alpha.append(alpha)
         else:
             self.points.append(points)
             self.point_style.append('m')
+            self.point_alpha.append(alpha)
 
     def add_states(self, state, kind='vector'):
         """Add a state vector Qobj to Bloch sphere.
@@ -448,7 +458,7 @@ class Bloch:
             self.fig = plt.figure(figsize=self.figsize)
 
         if not axes:
-            self.axes = Axes3D(self.fig, azim=self.view[0], elev=self.view[1])
+            self.axes = Axes3D(self.fig, azim=self.view[0], elev=self.view[1],alpha = alphas)
 
         if self.background:
             self.axes.clear()
@@ -600,6 +610,7 @@ class Bloch:
                     edgecolor=None,
                     zdir='z',
                     color=self.point_color[mod(k, len(self.point_color))],
+                    alpha=self.point_alpha[mod(k, len(self.point_alpha))],
                     marker=self.point_marker[mod(k, len(self.point_marker))])
 
             elif self.point_style[k] == 'm':
@@ -613,16 +624,17 @@ class Bloch:
                 self.axes.scatter(real(self.points[k][1][indperm]),
                                   -real(self.points[k][0][indperm]),
                                   real(self.points[k][2][indperm]),
-                                  s=s, alpha=1, edgecolor=None,
+                                  s=s, alpha=alpha, edgecolor=None,
                                   zdir='z', color=pnt_colors,
                                   marker=marker)
 
             elif self.point_style[k] == 'l':
                 color = self.point_color[mod(k, len(self.point_color))]
+                alpha = self.point_alpha[mod(k, len(self.point_alpha))]
                 self.axes.plot(real(self.points[k][1]),
                                -real(self.points[k][0]),
                                real(self.points[k][2]),
-                               alpha=0.75, zdir='z',
+                               alpha=0.75*alpha, zdir='z',
                                color=color)
 
     def plot_annotations(self):
